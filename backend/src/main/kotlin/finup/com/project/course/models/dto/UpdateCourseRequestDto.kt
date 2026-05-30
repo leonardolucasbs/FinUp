@@ -1,0 +1,11 @@
+package finup.com.project.course.models.dto
+
+import jakarta.validation.constraints.NotBlank
+
+data class UpdateCourseRequestDto(
+    @field:NotBlank(message = "Title is required")
+    val title: String,
+
+    @field:NotBlank(message = "Description is required")
+    val description: String
+)
