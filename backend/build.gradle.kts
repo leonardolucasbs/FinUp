@@ -28,6 +28,7 @@ dependencies {
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2")
 	implementation("tools.jackson.module:jackson-module-kotlin")
 	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
 	compileOnly("org.projectlombok:lombok")
 	runtimeOnly("org.xerial:sqlite-jdbc")
 	annotationProcessor("org.projectlombok:lombok")
