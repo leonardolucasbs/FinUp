@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity
 import finup.com.project.user.dto.UserCreateDTO
 import finup.com.project.user.dto.UserUpdateDTO
 import finup.com.project.user.services.UserService
+import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -23,12 +24,12 @@ class UserController(private val userService: UserService) {
     }
 
     @PostMapping
-    fun createUser(@RequestBody user: UserCreateDTO): ResponseEntity<Any> {
+    fun createUser(@RequestBody @Valid user: UserCreateDTO): ResponseEntity<Any> {
         return userService.createUser(user)
     }
 
     @PutMapping("/{id}")
-    fun updateUser(@RequestBody user: UserUpdateDTO, @PathVariable id: Int): ResponseEntity<Any> {
+    fun updateUser(@RequestBody @Valid user: UserUpdateDTO, @PathVariable id: Int): ResponseEntity<Any> {
         return userService.updateUser(id, user)
     }
 
