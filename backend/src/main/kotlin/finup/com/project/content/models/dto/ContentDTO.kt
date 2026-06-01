@@ -1,7 +1,7 @@
 package finup.com.project.content.models.dto
 
 import java.time.LocalDateTime
-import finup.com.project.content.models.ContentType
+import finup.com.project.content.models.enums.ContentType
 
 data class ContentDTO(
     val id: Long,
@@ -10,6 +10,7 @@ data class ContentDTO(
     val type: ContentType,
     val description: String,
     val imageUrl: String?,
+    val userId: Int,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
 )

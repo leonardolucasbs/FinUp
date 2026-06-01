@@ -1,7 +1,7 @@
 package finup.com.project.content.models.dto
 
 import jakarta.validation.constraints.NotBlank
-import finup.com.project.content.models.ContentType
+import finup.com.project.content.models.enums.ContentType
 
 data class UpdateContentRequestDTO(
     @field:NotBlank(message = "Title is required")

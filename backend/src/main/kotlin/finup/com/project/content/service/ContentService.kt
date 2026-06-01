@@ -6,19 +6,22 @@ import finup.com.project.content.models.dto.ContentDTO
 import finup.com.project.content.models.dto.CreateContentRequestDto
 import finup.com.project.content.models.dto.UpdateContentRequestDTO
 import finup.com.project.content.repository.ContentRepository
-import finup.com.project.content.models.Content
-import finup.com.project.content.models.ContentType
+import finup.com.project.exception.ApiException
+import finup.com.project.user.repositories.UserRepository
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 @Service
 class ContentService(
     private val contentRepository: ContentRepository,
-    private val contentMapper: ContentMapper
+    private val contentMapper: ContentMapper,
+    private val userRepository: UserRepository
 ) {
 
     fun create(dto: CreateContentRequestDto): ContentDTO {
-        val content = contentMapper.toEntity(dto)
+        val user = userRepository.findUserById(dto.userId)
+            .orElseThrow { ApiException(ApiException.Error.USER_NOT_FOUND) }
+        val content = contentMapper.toEntity(dto, user)
         val savedContent = contentRepository.save(content)
         return contentMapper.toDTO(savedContent)
     }
