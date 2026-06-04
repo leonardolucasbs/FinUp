@@ -18,6 +18,7 @@ import finup.com.project.exception.ApiException
 import finup.com.project.user.models.User
 import finup.com.project.user.repositories.UserRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
 @Service
@@ -47,6 +48,14 @@ class DashboardService(
     fun findByUser(userId: Int): List<DashboardDTO> {
         getUser(userId)
         return dashboardRepository.findAllByUserId(userId).map { toDTO(it) }
+    }
+
+    @Transactional
+    fun deleteDashboard(id: Long) {
+        val dashboard = getDashboard(id)
+        val expenses = expenseRepository.findAllByDashboardId(id)
+        expenseRepository.deleteAll(expenses)
+        dashboardRepository.delete(dashboard)
     }
 
     fun createCategory(dto: CreateCategoryRequestDTO): CategoryDTO {
