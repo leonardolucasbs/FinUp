@@ -1,6 +1,7 @@
 package finup.com.project.user.services
 
 import finup.com.project.user.dto.UserCreateDTO
+import finup.com.project.user.dto.UserLoginDTO
 import finup.com.project.user.dto.UserResponseDTO
 import finup.com.project.user.dto.UserUpdateDTO
 import finup.com.project.exception.ApiException
@@ -39,6 +40,22 @@ class UserService (
                     "response" to "Usuário criado com sucesso"
                 )
             )
+    }
+
+    fun loginUser(user: UserLoginDTO): ResponseEntity<Any> {
+        val findUser = userRepository.findUserByUsername(user.username)
+
+        if (findUser.isEmpty || findUser.get().password != user.password) {
+            throw ApiException(ApiException.Error.INVALID_CREDENTIALS)
+        }
+
+        val userResponseDto = UserResponseDTO(findUser.get().fullName, findUser.get().username)
+
+        return ResponseEntity.ok(
+            mapOf(
+                "data" to userResponseDto
+            )
+        )
     }
 
     fun getUser(userId: Int): ResponseEntity<Any> {

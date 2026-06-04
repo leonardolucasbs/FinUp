@@ -2,6 +2,7 @@ package finup.com.project.user.controllers
 
 import org.springframework.http.ResponseEntity
 import finup.com.project.user.dto.UserCreateDTO
+import finup.com.project.user.dto.UserLoginDTO
 import finup.com.project.user.dto.UserUpdateDTO
 import finup.com.project.user.services.UserService
 import jakarta.validation.Valid
@@ -26,6 +27,11 @@ class UserController(private val userService: UserService) {
     @PostMapping
     fun createUser(@RequestBody @Valid user: UserCreateDTO): ResponseEntity<Any> {
         return userService.createUser(user)
+    }
+
+    @PostMapping("/login")
+    fun loginUser(@RequestBody @Valid user: UserLoginDTO): ResponseEntity<Any> {
+        return userService.loginUser(user)
     }
 
     @PutMapping("/{id}")

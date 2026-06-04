@@ -6,13 +6,15 @@ class CustomTextField extends StatelessWidget {
   final String hint;
   final IconData icon;
   final bool isPassword;
+  final TextEditingController? controller;
 
   const CustomTextField({
-    super.key, 
-    required this.label, 
-    required this.hint, 
-    required this.icon, 
-    this.isPassword = false
+    super.key,
+    required this.label,
+    required this.hint,
+    required this.icon,
+    this.isPassword = false,
+    this.controller,
   });
 
   @override
@@ -20,9 +22,16 @@ class CustomTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: AppColors.textGrey, fontWeight: FontWeight.w500)),
+        Text(
+          label,
+          style: const TextStyle(
+            color: AppColors.textGrey,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         const SizedBox(height: 8),
         TextField(
+          controller: controller,
           obscureText: isPassword,
           style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(

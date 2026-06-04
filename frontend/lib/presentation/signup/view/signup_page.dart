@@ -1,10 +1,59 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/presentation/widgets/custom_text.dart';
+import 'package:frontend/data/services/user_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../widgets/custom_text.dart';
 
-class SignupPage extends StatelessWidget {
+class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
+
+  @override
+  State<SignupPage> createState() => _SignupPageState();
+}
+
+class _SignupPageState extends State<SignupPage> {
+  final _fullNameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _userService = UserService();
+  bool _isSubmitting = false;
+
+  @override
+  void dispose() {
+    _fullNameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _createAccount() async {
+    if (_isSubmitting) return;
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      await _userService.createUser(
+        fullName: _fullNameController.text.trim(),
+        username: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      if (!mounted) return;
+      _showMessage('Usuario criado com sucesso');
+    } catch (error) {
+      if (!mounted) return;
+      _showMessage(error.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,9 +64,12 @@ class SignupPage extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 80),
-            const Icon(Icons.trending_up, color: AppColors.primaryOrange, size: 80),
-            const Text("FinUp", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white)),
-            
+            Image.asset(
+              'assets/images/logo_finup.jpeg.png',
+              width: 100,
+              height: 100,
+              fit: BoxFit.contain,
+            ),
             const SizedBox(height: 40),
 
             Container(
@@ -36,24 +88,49 @@ class SignupPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 30),
 
-                  const CustomTextField(label: "Nome Completo", hint: "Digite seu nome", icon: Icons.person_outline),
+                  CustomTextField(
+                    label: "Nome Completo",
+                    hint: "Digite seu nome",
+                    icon: Icons.person_outline,
+                    controller: _fullNameController,
+                  ),
                   const SizedBox(height: 20),
-                  const CustomTextField(label: "E-mail", hint: "seu@email.com", icon: Icons.email_outlined),
+                  CustomTextField(
+                    label: "E-mail",
+                    hint: "seu@email.com",
+                    icon: Icons.email_outlined,
+                    controller: _emailController,
+                  ),
                   const SizedBox(height: 20),
-                  const CustomTextField(label: "Senha", hint: "........", icon: Icons.lock_outline, isPassword: true),
+                  CustomTextField(
+                    label: "Senha",
+                    hint: "........",
+                    icon: Icons.lock_outline,
+                    isPassword: true,
+                    controller: _passwordController,
+                  ),
 
                   const SizedBox(height: 30),
-                  
+
                   SizedBox(
                     width: double.infinity,
                     height: 55,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryOrange,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
                       ),
-                      onPressed: () {},
-                      child: const Text("Criar Conta", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                      onPressed: _createAccount,
+                      child: const Text(
+                        "Criar Conta",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -68,14 +145,24 @@ class SignupPage extends StatelessWidget {
   Widget _tabButton(String title, bool active, BuildContext context) {
     return Expanded(
       child: GestureDetector(
-        onTap: () { if (!active) Navigator.pop(context); },
+        onTap: () {
+          if (!active) Navigator.pop(context);
+        },
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color: active ? AppColors.primaryOrange : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Center(child: Text(title, style: TextStyle(color: active ? Colors.white : AppColors.textGrey, fontWeight: FontWeight.bold))),
+          child: Center(
+            child: Text(
+              title,
+              style: TextStyle(
+                color: active ? Colors.white : AppColors.textGrey,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         ),
       ),
     );
