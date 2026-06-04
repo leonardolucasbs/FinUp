@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/data/services/user_service.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../dashboard/view/dashboard_list_page.dart';
 import '../../widgets/custom_text.dart';
 import '../../signup/view/signup_page.dart';
 
@@ -30,13 +31,16 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _isSubmitting = true);
 
     try {
-      await _userService.login(
+      final user = await _userService.login(
         username: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
       if (!mounted) return;
-      _showMessage('Login realizado com sucesso');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => DashboardListPage(user: user)),
+      );
     } catch (error) {
       if (!mounted) return;
       _showMessage(error.toString().replaceFirst('Exception: ', ''));
