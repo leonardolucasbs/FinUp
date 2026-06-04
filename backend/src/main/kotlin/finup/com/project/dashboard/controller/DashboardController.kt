@@ -12,6 +12,7 @@ import finup.com.project.dashboard.service.DashboardService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -34,8 +35,19 @@ class DashboardController(private val dashboardService: DashboardService) {
         return ResponseEntity.ok(dashboardService.findById(id))
     }
 
+    @DeleteMapping("/{id}")
+    fun deleteDashboard(@PathVariable id: Long): ResponseEntity<Void> {
+        dashboardService.deleteDashboard(id)
+        return ResponseEntity.noContent().build()
+    }
+
     @GetMapping("/users/{userId}")
     fun findByUser(@PathVariable userId: Int): ResponseEntity<List<DashboardDTO>> {
+        return ResponseEntity.ok(dashboardService.findByUser(userId))
+    }
+
+    @GetMapping("/getall/{userId}")
+    fun findAllByUser(@PathVariable userId: Int): ResponseEntity<List<DashboardDTO>> {
         return ResponseEntity.ok(dashboardService.findByUser(userId))
     }
 

@@ -49,7 +49,7 @@ class UserService (
             throw ApiException(ApiException.Error.INVALID_CREDENTIALS)
         }
 
-        val userResponseDto = UserResponseDTO(findUser.get().fullName, findUser.get().username)
+        val userResponseDto = UserResponseDTO(findUser.get().id!!, findUser.get().fullName, findUser.get().username)
 
         return ResponseEntity.ok(
             mapOf(
@@ -65,7 +65,7 @@ class UserService (
             throw ApiException(ApiException.Error.USER_NOT_FOUND)
         }
 
-        val userResponseDto = UserResponseDTO(findUser.get().fullName, findUser.get().username)
+        val userResponseDto = UserResponseDTO(findUser.get().id!!, findUser.get().fullName, findUser.get().username)
 
         return ResponseEntity.ok(
             mapOf(
