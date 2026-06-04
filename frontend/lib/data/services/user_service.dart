@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:frontend/core/network/api_client.dart';
+import 'package:frontend/data/models/app_user.dart';
 
 class UserService {
   UserService({Dio? dio}) : _dio = dio ?? ApiClient.dio;
@@ -25,15 +26,21 @@ class UserService {
     }
   }
 
-  Future<void> login({
+  Future<AppUser> login({
     required String username,
     required String password,
   }) async {
     try {
-      await _dio.post(
+      final response = await _dio.post(
         '/users/login',
         data: {'username': username, 'password': password},
       );
+      final data = response.data;
+      if (data is Map<String, dynamic> &&
+          data['data'] is Map<String, dynamic>) {
+        return AppUser.fromJson(data['data'] as Map<String, dynamic>);
+      }
+      throw Exception('Resposta de login invalida.');
     } on DioException catch (error) {
       throw Exception(_messageFromDio(error));
     }
