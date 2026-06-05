@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/data/models/app_user.dart';
 import 'package:frontend/presentation/dashboard/widgets/dashboard_bottom_nav.dart';
+import 'package:frontend/presentation/profile/view/profile_page.dart';
 
 class EmptyFeaturePage extends StatelessWidget {
   const EmptyFeaturePage({
@@ -66,6 +67,13 @@ class EmptyFeaturePage extends StatelessWidget {
     if (tab == activeTab) return;
     if (tab == DashboardTab.home) {
       Navigator.pop(context);
+      return;
+    }
+    if (tab == DashboardTab.profile) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => ProfilePage(user: user)),
+      );
       return;
     }
 
