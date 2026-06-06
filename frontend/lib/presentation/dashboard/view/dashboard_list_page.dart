@@ -9,6 +9,7 @@ import 'package:frontend/presentation/dashboard/widgets/create_dashboard_sheet.d
 import 'package:frontend/presentation/dashboard/widgets/dashboard_bottom_nav.dart';
 import 'package:frontend/presentation/dashboard/widgets/dashboard_control_card.dart';
 import 'package:frontend/presentation/dashboard/widgets/dashboard_header.dart';
+import 'package:frontend/presentation/profile/view/profile_page.dart';
 
 class DashboardListPage extends StatefulWidget {
   const DashboardListPage({super.key, required this.user});
@@ -167,6 +168,14 @@ class _DashboardListPageState extends State<DashboardListPage> {
 
   void _openTab(DashboardTab tab) {
     if (tab == DashboardTab.home) return;
+    if (tab == DashboardTab.profile) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => ProfilePage(user: widget.user)),
+      );
+      return;
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(

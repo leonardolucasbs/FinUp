@@ -11,6 +11,7 @@ import 'package:frontend/presentation/dashboard/widgets/add_money_sheet.dart';
 import 'package:frontend/presentation/dashboard/widgets/dashboard_bottom_nav.dart';
 import 'package:frontend/presentation/dashboard/widgets/financial_summary_card.dart';
 import 'package:frontend/presentation/dashboard/widgets/month_report_card.dart';
+import 'package:frontend/presentation/profile/view/profile_page.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({
@@ -262,6 +263,14 @@ class _DashboardPageState extends State<DashboardPage> {
 
   void _openTab(DashboardTab tab) {
     if (tab == DashboardTab.home) return;
+    if (tab == DashboardTab.profile) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => ProfilePage(user: widget.user)),
+      );
+      return;
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(

@@ -9,6 +9,14 @@ class AppUser {
   final String fullName;
   final String username;
 
+  AppUser copyWith({String? fullName, String? username}) {
+    return AppUser(
+      id: id,
+      fullName: fullName ?? this.fullName,
+      username: username ?? this.username,
+    );
+  }
+
   factory AppUser.fromJson(Map<String, dynamic> json) {
     return AppUser(
       id: (json['id'] as num).toInt(),
