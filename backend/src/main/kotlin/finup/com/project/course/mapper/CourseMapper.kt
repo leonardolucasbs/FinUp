@@ -11,7 +11,9 @@ class CourseMapper {
     fun toEntity(dto: CreateCourseRequestDto): Course {
         return Course(
             title = dto.title,
-            description = dto.description
+            description = dto.description,
+            teacher = dto.teacher,
+            imageUrl = dto.imageUrl,
         )
     }
 
@@ -20,6 +22,8 @@ class CourseMapper {
             id = entity.id!!,
             title = entity.title,
             description = entity.description,
+            imageUrl = entity.imageUrl,
+            teacher = entity.teacher,
             createdAt = entity.createdAt,
             updatedAt = entity.updatedAt
         )
