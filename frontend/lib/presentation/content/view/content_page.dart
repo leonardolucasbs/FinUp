@@ -8,11 +8,13 @@ import 'package:frontend/data/services/user_service.dart';
 import 'package:frontend/presentation/common/view/empty_feature_page.dart';
 import 'package:frontend/presentation/content/controller/content_controller.dart';
 import 'package:frontend/presentation/content/widgets/create_content_sheet.dart';
+import 'package:frontend/presentation/dashboard/view/dashboard_list_page.dart';
+import 'package:frontend/presentation/profile/view/profile_page.dart';
 import 'package:frontend/presentation/widgets/nav_footer.dart';
 import 'package:frontend/presentation/widgets/nav_header.dart';
-import 'package:frontend/presentation/profile/view/profile_page.dart';
+
 import 'package:intl/intl.dart';
-import '../../dashboard/view/dashboard_list_page.dart';
+
 
 class ContentPage extends StatefulWidget {
   const ContentPage({super.key, required this.user});
@@ -176,7 +178,7 @@ class _ContentPageState extends State<ContentPage> {
     }
   }
 
-    String _titleFor(DashboardTab tab) {
+  String _titleFor(DashboardTab tab) {
     return switch (tab) {
       DashboardTab.home    => 'Home',
       DashboardTab.saved   => 'Conteúdo',
