@@ -82,12 +82,7 @@ class DashboardHeader extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-            ),
-            IconButton(
-              onPressed: onMenuTap,
-              icon: const Icon(Icons.menu_rounded),
-              color: Colors.white,
-            ),
+            )
           ],
         ),
       ),

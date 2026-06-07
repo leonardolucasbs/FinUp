@@ -5,13 +5,14 @@ import 'package:frontend/data/models/content_model.dart';
 import 'package:frontend/data/services/content_service.dart';
 import 'package:frontend/data/services/saved_content_service.dart';
 import 'package:frontend/data/services/user_service.dart';
-import 'package:frontend/presentation/common/view/empty_feature_page.dart';
 import 'package:frontend/presentation/content/controller/content_controller.dart';
 import 'package:frontend/presentation/content/widgets/create_content_sheet.dart';
+import 'package:frontend/presentation/course/view/course_page.dart';
 import 'package:frontend/presentation/dashboard/view/dashboard_list_page.dart';
 import 'package:frontend/presentation/profile/view/profile_page.dart';
 import 'package:frontend/presentation/widgets/nav_footer.dart';
 import 'package:frontend/presentation/widgets/nav_header.dart';
+import 'package:frontend/presentation/widgets/shared_ui.dart';
 
 import 'package:intl/intl.dart';
 
@@ -27,6 +28,7 @@ class ContentPage extends StatefulWidget {
 
 class _ContentPageState extends State<ContentPage> {
   late final ContentController _controller;
+  final _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -41,6 +43,7 @@ class _ContentPageState extends State<ContentPage> {
 
   @override
   void dispose() {
+    _searchController.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -81,55 +84,91 @@ class _ContentPageState extends State<ContentPage> {
 
   Widget _buildContent() {
     if (_controller.isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primaryOrange),
-      );
+      return const AppLoadingState();
     }
 
     if (_controller.errorMessage != null) {
-      return _ContentErrorState(
+      return AppErrorState(
         message: _controller.errorMessage!,
         onRetry: _controller.load,
       );
     }
 
-    if (_controller.contents.isEmpty) {
-      return const _ContentEmptyState();
-    }
+    final contents = _controller.filteredContents;
 
     return RefreshIndicator(
       color: AppColors.primaryOrange,
       backgroundColor: AppColors.cardGrey,
       onRefresh: _controller.load,
-      child: ListView.builder(
+      child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
-        itemCount: _controller.contents.length,
-        itemBuilder: (context, index) {
-          final content = _controller.contents[index];
-          final isOwner = _controller.isOwner(content);
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: index == _controller.contents.length - 1 ? 0 : 14,
-            ),
-            child: ContentCard(
-              content: content,
-              saveCount: _controller.saveCountFor(
-                content.id,
+        children: [
+          const Center(
+            child: Text(
+              'Conteudo',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
               ),
-              isSaved: _controller.hasUserSaved(content.id),
-              isSaving: _controller.isSavingContent(content.id),
-              isActionDisabled: _controller.isSubmitting,
-              onEdit: isOwner ? () => _showEditSheet(content) : null,
-              onDelete: isOwner
-                  ? () => _confirmDeleteContent(content)
-                  : null,
-              onToggleSaved: isOwner ? null : () => _toggleSaved(content),
             ),
-          );
-        },
+          ),
+          const SizedBox(height: 18),
+          AppSearchInput(
+            controller: _searchController,
+            hintText: 'Pesquisar postagens',
+            onChanged: _controller.setSearchTerm,
+          ),
+          const SizedBox(height: 12),
+          AppFilterTabs(
+            firstLabel: 'Todas as postagens',
+            secondLabel: 'Minhas postagens',
+            isSecondActive: _controller.showOnlyMyPosts,
+            onFirstPressed: () => _controller.setShowOnlyMyPosts(false),
+            onSecondPressed: () => _controller.setShowOnlyMyPosts(true),
+          ),
+          const SizedBox(height: 16),
+          if (contents.isEmpty)
+            AppEmptyState(
+              icon: Icons.article_outlined,
+              message: _emptyMessage(),
+              compact: true,
+            )
+          else
+            ...contents.map(
+              (content) {
+                final isOwner = _controller.isOwner(content);
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: ContentCard(
+                    content: content,
+                    saveCount: _controller.saveCountFor(content.id),
+                    isSaved: _controller.hasUserSaved(content.id),
+                    isSaving: _controller.isSavingContent(content.id),
+                    isActionDisabled: _controller.isSubmitting,
+                    onEdit: isOwner ? () => _showEditSheet(content) : null,
+                    onDelete: isOwner
+                        ? () => _confirmDeleteContent(content)
+                        : null,
+                    onToggleSaved: isOwner ? null : () => _toggleSaved(content),
+                  ),
+                );
+              },
+            ),
+        ],
       ),
     );
+  }
+
+  String _emptyMessage() {
+    if (_controller.searchTerm.trim().isNotEmpty) {
+      return 'Nenhuma postagem encontrada para a pesquisa.';
+    }
+    if (_controller.showOnlyMyPosts) {
+      return 'Voce ainda nao publicou postagens.';
+    }
+    return 'Nenhum conteudo publicado ainda.';
   }
 
   void _openTab(DashboardTab tab) {
@@ -148,12 +187,7 @@ class _ContentPageState extends State<ContentPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => EmptyFeaturePage(
-              title: _titleFor(tab),
-              icon: _iconFor(tab),
-              activeTab: tab,
-              user: widget.user,
-            ),
+            builder: (_) => CoursesPage(user: widget.user),
           ),
         );
         break;
@@ -268,53 +302,10 @@ class _ContentPageState extends State<ContentPage> {
   Future<void> _confirmDeleteContent(ContentModel content) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          backgroundColor: AppColors.cardGrey,
-          surfaceTintColor: AppColors.cardGrey,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-            side: const BorderSide(color: AppColors.border),
-          ),
-          title: const Text(
-            'Delete Content',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          content: const Text(
-            'Are you sure you want to permanently delete this content?',
-            style: TextStyle(
-              color: AppColors.textGrey,
-              height: 1.35,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(
-                  color: AppColors.muted,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: const Text(
-                'Delete',
-                style: TextStyle(
-                  color: AppColors.primaryRed,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+      builder: (_) => const ConfirmDeleteDialog(
+        title: 'Excluir postagem',
+        message: 'Tem certeza que deseja excluir esta postagem?',
+      ),
     );
 
     if (!mounted || confirmed != true) return;
@@ -516,14 +507,14 @@ class ContentCard extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          _ContentActionButton(
+                          AppActionButton(
                             onPressed: isActionDisabled ? null : onEdit,
                             icon: Icons.edit_rounded,
                             label: 'Edit',
                             foregroundColor: AppColors.muted,
                           ),
                           const SizedBox(width: 8),
-                          _ContentActionButton(
+                          AppActionButton(
                             onPressed: isActionDisabled ? null : onDelete,
                             icon: Icons.delete_outline_rounded,
                             label: 'Delete',
@@ -534,7 +525,7 @@ class ContentCard extends StatelessWidget {
                     else if (canSaveContent)
                       Align(
                         alignment: Alignment.centerRight,
-                        child: _ContentActionButton(
+                        child: AppActionButton(
                           onPressed: isSaving ? null : onToggleSaved,
                           icon: isSaved
                               ? Icons.bookmark_added_rounded
