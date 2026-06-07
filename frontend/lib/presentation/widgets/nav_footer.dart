@@ -30,7 +30,7 @@ class DashboardBottomNav extends StatelessWidget {
             onTap: () => onTabSelected(DashboardTab.home),
           ),
           _NavItem(
-            label: 'Salvos',
+            label: 'Conteúdo',
             icon: Icons.bookmark_rounded,
             active: activeTab == DashboardTab.saved,
             onTap: () => onTabSelected(DashboardTab.saved),
