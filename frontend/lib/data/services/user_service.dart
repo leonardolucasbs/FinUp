@@ -54,6 +54,19 @@ class UserService {
     } on DioException catch (error) {
       throw Exception(_messageFromDio(error));
 
+  Future<AppUser> updateUser({
+    required AppUser user,
+    required String fullName,
+    required String password,
+  }) async {
+    try {
+      await _dio.put(
+        '/users/${user.id}',
+        data: {'fullName': fullName, 'password': password},
+      );
+      return user.copyWith(fullName: fullName);
+    } on DioException catch (error) {
+      throw Exception(_messageFromDio(error));
     }
   }
 

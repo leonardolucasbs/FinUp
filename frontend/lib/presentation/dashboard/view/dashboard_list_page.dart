@@ -10,6 +10,8 @@ import 'package:frontend/presentation/dashboard/widgets/create_dashboard_sheet.d
 import 'package:frontend/presentation/widgets/nav_footer.dart';
 import 'package:frontend/presentation/dashboard/widgets/dashboard_control_card.dart';
 import 'package:frontend/presentation/widgets/nav_header.dart';
+import 'package:frontend/presentation/dashboard/widgets/dashboard_header.dart';
+import 'package:frontend/presentation/profile/view/profile_page.dart';
 
 class DashboardListPage extends StatefulWidget {
   const DashboardListPage({super.key, required this.user});

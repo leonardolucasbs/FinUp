@@ -4,6 +4,8 @@ import 'package:frontend/data/models/app_user.dart';
 import 'package:frontend/presentation/content/view/content_page.dart';
 import 'package:frontend/presentation/widgets/nav_footer.dart';
 import 'package:frontend/presentation/dashboard/view/dashboard_list_page.dart';
+import 'package:frontend/presentation/dashboard/widgets/dashboard_bottom_nav.dart';
+import 'package:frontend/presentation/profile/view/profile_page.dart';
 
 class EmptyFeaturePage extends StatelessWidget {
   const EmptyFeaturePage({
@@ -64,8 +66,19 @@ class EmptyFeaturePage extends StatelessWidget {
     );
   }
 
-    void _openTab(DashboardTab tab, BuildContext context) {
-      switch (tab) {
+  void _navigate(BuildContext context, DashboardTab tab) {
+    if (tab == activeTab) return;
+    if (tab == DashboardTab.home) {
+      Navigator.pop(context);
+      return;
+    }
+    if (tab == DashboardTab.profile) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => ProfilePage(user: user)),
+      );
+      return;
+    }
 
         case DashboardTab.saved:
           Navigator.pushReplacement(

@@ -19,6 +19,15 @@ class ContentModel {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  String get typeLabel {
+    return switch (type) {
+      'NOTES' => 'Nota',
+      'NEWS' => 'Noticia',
+      'ARTICLES' => 'Artigo',
+      _ => 'Outro',
+    };
+  }
+
   factory ContentModel.fromJson(Map<String, dynamic> json) {
     return ContentModel(
       id: (json['id'] as num).toInt(),

@@ -84,6 +84,6 @@ class ContentService {
         return message.values.whereType<String>().join('\n');
       }
     }
-    return 'Nao foi possivel concluir a requisicao.';
+    return 'Nao foi possivel carregar as postagens.';
   }
 }
