@@ -8,7 +8,8 @@ import 'package:frontend/presentation/dashboard/controller/dashboard_controller.
 import 'package:frontend/presentation/dashboard/widgets/action_buttons.dart';
 import 'package:frontend/presentation/dashboard/widgets/add_expense_sheet.dart';
 import 'package:frontend/presentation/dashboard/widgets/add_money_sheet.dart';
-import 'package:frontend/presentation/dashboard/widgets/dashboard_bottom_nav.dart';
+import 'package:frontend/presentation/content/view/content_page.dart';
+import 'package:frontend/presentation/widgets/nav_footer.dart';
 import 'package:frontend/presentation/dashboard/widgets/financial_summary_card.dart';
 import 'package:frontend/presentation/dashboard/widgets/month_report_card.dart';
 
@@ -261,26 +262,56 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   void _openTab(DashboardTab tab) {
-    if (tab == DashboardTab.home) return;
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => EmptyFeaturePage(
-          title: _titleFor(tab),
-          icon: _iconFor(tab),
-          activeTab: tab,
-          user: widget.user,
-        ),
-      ),
-    );
+    switch (tab) {
+
+      case DashboardTab.saved:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ContentPage(user: widget.user),
+          ),
+        );
+        break;
+
+      case DashboardTab.courses:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => EmptyFeaturePage(
+            title: _titleFor(tab),
+            icon: _iconFor(tab),
+            activeTab: tab,
+            user: widget.user,
+            ),
+          ),
+        );
+        return;
+
+      case DashboardTab.home:
+        return;
+
+      case DashboardTab.profile:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => EmptyFeaturePage(
+            title: _titleFor(tab),
+            icon: _iconFor(tab),
+            activeTab: tab,
+            user: widget.user,
+            ),
+          ),
+        );
+        break;
+    }
   }
 
   String _titleFor(DashboardTab tab) {
     return switch (tab) {
-      DashboardTab.saved => 'Salvos',
+      DashboardTab.home    => 'Home',
+      DashboardTab.saved   => 'Conteudo',
       DashboardTab.courses => 'Cursos',
-      DashboardTab.profile => widget.user.fullName,
-      DashboardTab.home => 'Home',
+      DashboardTab.profile => 'Meu Perfil',
     };
   }
 
