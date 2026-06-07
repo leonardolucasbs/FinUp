@@ -8,10 +8,9 @@ import 'package:frontend/presentation/dashboard/view/dashboard_page.dart';
 import 'package:frontend/presentation/content/view/content_page.dart';
 import 'package:frontend/presentation/dashboard/widgets/create_dashboard_sheet.dart';
 import 'package:frontend/presentation/widgets/nav_footer.dart';
+import 'package:frontend/presentation/profile/view/profile_page.dart';
 import 'package:frontend/presentation/dashboard/widgets/dashboard_control_card.dart';
 import 'package:frontend/presentation/widgets/nav_header.dart';
-import 'package:frontend/presentation/dashboard/widgets/dashboard_header.dart';
-import 'package:frontend/presentation/profile/view/profile_page.dart';
 
 class DashboardListPage extends StatefulWidget {
   const DashboardListPage({super.key, required this.user});
@@ -201,12 +200,7 @@ class _DashboardListPageState extends State<DashboardListPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => EmptyFeaturePage(
-            title: _titleFor(tab),
-            icon: _iconFor(tab),
-            activeTab: tab,
-            user: widget.user,
-            ),
+            builder: (_) => ProfilePage(user: widget.user),
           ),
         );
         break;

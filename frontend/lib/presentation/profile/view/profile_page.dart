@@ -4,7 +4,7 @@ import 'package:frontend/data/models/app_user.dart';
 import 'package:frontend/data/models/content_model.dart';
 import 'package:frontend/data/services/content_service.dart';
 import 'package:frontend/presentation/common/view/empty_feature_page.dart';
-import 'package:frontend/presentation/dashboard/widgets/dashboard_bottom_nav.dart';
+import 'package:frontend/presentation/widgets/nav_footer.dart';
 import 'package:frontend/presentation/login/view/login_page.dart';
 import 'package:frontend/presentation/profile/view/edit_profile_page.dart';
 
@@ -530,13 +530,6 @@ class _PostCard extends StatelessWidget {
                 size: 16,
               ),
               const SizedBox(width: 4),
-              Text(
-                '${post.likes}',
-                style: const TextStyle(
-                  color: AppColors.textGrey,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
             ],
           ),
           const SizedBox(height: 12),

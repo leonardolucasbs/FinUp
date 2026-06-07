@@ -10,6 +10,7 @@ import 'package:frontend/presentation/content/controller/content_controller.dart
 import 'package:frontend/presentation/content/widgets/create_content_sheet.dart';
 import 'package:frontend/presentation/widgets/nav_footer.dart';
 import 'package:frontend/presentation/widgets/nav_header.dart';
+import 'package:frontend/presentation/profile/view/profile_page.dart';
 import 'package:intl/intl.dart';
 import '../../dashboard/view/dashboard_list_page.dart';
 
@@ -168,12 +169,7 @@ class _ContentPageState extends State<ContentPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => EmptyFeaturePage(
-              title: _titleFor(tab),
-              icon: _iconFor(tab),
-              activeTab: tab,
-              user: widget.user,
-            ),
+            builder: (_) => ProfilePage(user: widget.user),
           ),
         );
         break;

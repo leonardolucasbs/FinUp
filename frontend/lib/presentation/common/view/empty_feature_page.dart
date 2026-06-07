@@ -3,9 +3,8 @@ import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/data/models/app_user.dart';
 import 'package:frontend/presentation/content/view/content_page.dart';
 import 'package:frontend/presentation/widgets/nav_footer.dart';
-import 'package:frontend/presentation/dashboard/view/dashboard_list_page.dart';
-import 'package:frontend/presentation/dashboard/widgets/dashboard_bottom_nav.dart';
 import 'package:frontend/presentation/profile/view/profile_page.dart';
+import 'package:frontend/presentation/dashboard/view/dashboard_list_page.dart';
 
 class EmptyFeaturePage extends StatelessWidget {
   const EmptyFeaturePage({
@@ -66,19 +65,8 @@ class EmptyFeaturePage extends StatelessWidget {
     );
   }
 
-  void _navigate(BuildContext context, DashboardTab tab) {
-    if (tab == activeTab) return;
-    if (tab == DashboardTab.home) {
-      Navigator.pop(context);
-      return;
-    }
-    if (tab == DashboardTab.profile) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => ProfilePage(user: user)),
-      );
-      return;
-    }
+    void _openTab(DashboardTab tab, BuildContext context) {
+      switch (tab) {
 
         case DashboardTab.saved:
           Navigator.pushReplacement(
@@ -116,12 +104,7 @@ class EmptyFeaturePage extends StatelessWidget {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (_) => EmptyFeaturePage(
-                title: _titleFor(tab),
-                icon: _iconFor(tab),
-                activeTab: tab,
-                user: user,
-              ),
+              builder: (_) => ProfilePage(user: user),
             ),
           );
           break;

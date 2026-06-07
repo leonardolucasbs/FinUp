@@ -7,6 +7,23 @@ class ContentService {
 
   final Dio _dio;
 
+  Future<List<ContentModel>> findContentsByUser(int userId) async {
+    try {
+      final response = await _dio.get('/contents');
+      final data = response.data;
+      if (data is! List) return const [];
+
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(ContentModel.fromJson)
+          .where((content) => content.userId == userId)
+          .toList(growable: false);
+    } on DioException catch (error) {
+      throw Exception(_messageFromDio(error));
+    }
+  }
+
+
   Future<List<ContentModel>> findAllContents() async {
     try {
       final response = await _dio.get('/contents');

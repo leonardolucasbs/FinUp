@@ -12,7 +12,6 @@ import 'package:frontend/presentation/content/view/content_page.dart';
 import 'package:frontend/presentation/widgets/nav_footer.dart';
 import 'package:frontend/presentation/dashboard/widgets/financial_summary_card.dart';
 import 'package:frontend/presentation/dashboard/widgets/month_report_card.dart';
-import 'package:frontend/presentation/profile/view/profile_page.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({

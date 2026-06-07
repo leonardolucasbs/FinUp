@@ -53,7 +53,10 @@ class UserService {
 
     } on DioException catch (error) {
       throw Exception(_messageFromDio(error));
-
+    
+    }
+  }
+  
   Future<AppUser> updateUser({
     required AppUser user,
     required String fullName,
