@@ -11,7 +11,9 @@ class ApiException(val error: Error) : RuntimeException(error.message) {
         INVALID_CREDENTIALS(HttpStatus.BAD_REQUEST.value(), "E-mail ou senha invalida."),
         USER_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "Usuario nao encontrado."),
         CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "Categoria nao encontrada."),
-        DASHBOARD_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "Dashboard nao encontrado.")
+        DASHBOARD_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "Dashboard nao encontrado."),
+        CANNOT_SAVE_OWN_CONTENT(HttpStatus.BAD_REQUEST.value(), "Voce nao pode salvar seu proprio conteudo."),
+        CONTENT_ALREADY_SAVED(HttpStatus.BAD_REQUEST.value(), "Conteudo ja salvo por este usuario.")
     }
 
 }

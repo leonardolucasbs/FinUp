@@ -24,7 +24,6 @@ class ContentMapper {
         return ContentDTO(
             id = entity.id!!,
             title = entity.title,
-            likes = entity.likes,
             type = entity.type,
             description = entity.description,
             imageUrl = entity.imageUrl,

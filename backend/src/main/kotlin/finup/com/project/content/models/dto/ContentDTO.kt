@@ -6,7 +6,6 @@ import finup.com.project.content.models.enums.ContentType
 data class ContentDTO(
     val id: Long,
     val title: String,
-    val likes: Int,
     val type: ContentType,
     val description: String,
     val imageUrl: String?,

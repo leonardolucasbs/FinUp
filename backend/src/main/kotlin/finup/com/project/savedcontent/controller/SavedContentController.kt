@@ -29,8 +29,19 @@ class SavedContentController(private val savedContentService: SavedContentServic
         val savedContents = savedContentService.findAll()
         return ResponseEntity.ok(savedContents)
     }
+    @GetMapping("/{contentId}")
+    fun findNumberOfSavedContentById(@PathVariable contentId: Long): ResponseEntity<Int> {
+        val savedContents = savedContentService.numberOfSavedContentByContentId(contentId)
+        return ResponseEntity.ok(savedContents)
+    }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{contentId}/user/{userId}")
+    fun findIfUserSavedContent(@PathVariable contentId: Long,@PathVariable userId: Int): ResponseEntity<Boolean> {
+        val isUserSavedContent = savedContentService.findIfUserSavedContent(userId, contentId);
+        return ResponseEntity.ok(isUserSavedContent)
+    }
+
+    @GetMapping("/id/{id}")
     fun findById(@PathVariable id: Long): ResponseEntity<SavedContentDTO> {
         val savedContent = savedContentService.findById(id)
         return ResponseEntity.ok(savedContent)
