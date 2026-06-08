@@ -4,6 +4,7 @@ import 'package:frontend/data/models/app_user.dart';
 import 'package:frontend/data/models/dashboard_model.dart';
 import 'package:frontend/data/models/expense_model.dart';
 import 'package:frontend/presentation/common/view/empty_feature_page.dart';
+import 'package:frontend/presentation/course/view/course_page.dart';
 import 'package:frontend/presentation/dashboard/controller/dashboard_controller.dart';
 import 'package:frontend/presentation/dashboard/widgets/action_buttons.dart';
 import 'package:frontend/presentation/dashboard/widgets/add_expense_sheet.dart';
@@ -277,12 +278,7 @@ class _DashboardPageState extends State<DashboardPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => EmptyFeaturePage(
-            title: _titleFor(tab),
-            icon: _iconFor(tab),
-            activeTab: tab,
-            user: widget.user,
-            ),
+            builder: (_) => CoursesPage(user: widget.user),
           ),
         );
         return;

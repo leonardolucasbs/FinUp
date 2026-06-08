@@ -24,8 +24,29 @@ class ContentController extends ChangeNotifier {
   Set<int> savingContentIds = const {};
   bool isLoading = false;
   bool isSubmitting = false;
+  bool showOnlyMyPosts = false;
+  String searchTerm = '';
   String? errorMessage;
   String? submissionErrorMessage;
+
+  List<ContentModel> get filteredContents {
+    final term = searchTerm.trim().toLowerCase();
+    Iterable<ContentModel> result = contents;
+
+    if (showOnlyMyPosts) {
+      result = result.where((content) => content.userId == user.id);
+    }
+
+    if (term.isNotEmpty) {
+      result = result.where((content) {
+        return content.title.toLowerCase().contains(term) ||
+            content.description.toLowerCase().contains(term) ||
+            content.typeLabel.toLowerCase().contains(term);
+      });
+    }
+
+    return result.toList(growable: false);
+  }
 
   Future<void> load() async {
     isLoading = true;
@@ -81,6 +102,16 @@ class ContentController extends ChangeNotifier {
 
   int saveCountFor(int contentId) {
     return saveCounts[contentId] ?? 0;
+  }
+
+  void setSearchTerm(String value) {
+    searchTerm = value;
+    notifyListeners();
+  }
+
+  void setShowOnlyMyPosts(bool value) {
+    showOnlyMyPosts = value;
+    notifyListeners();
   }
 
   Future<void> loadSavedStatuses({bool force = false}) async {

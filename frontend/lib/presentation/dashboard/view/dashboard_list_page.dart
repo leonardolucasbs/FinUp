@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/data/models/app_user.dart';
 import 'package:frontend/data/models/dashboard_model.dart';
-import 'package:frontend/presentation/common/view/empty_feature_page.dart';
+import 'package:frontend/presentation/course/view/course_page.dart';
 import 'package:frontend/presentation/dashboard/controller/dashboard_list_controller.dart';
 import 'package:frontend/presentation/dashboard/view/dashboard_page.dart';
 import 'package:frontend/presentation/content/view/content_page.dart';
@@ -183,12 +183,7 @@ class _DashboardListPageState extends State<DashboardListPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => EmptyFeaturePage(
-            title: _titleFor(tab),
-            icon: _iconFor(tab),
-            activeTab: tab,
-            user: widget.user,
-            ),
+            builder: (_) => CoursesPage(user: widget.user),
           ),
         );
         return;

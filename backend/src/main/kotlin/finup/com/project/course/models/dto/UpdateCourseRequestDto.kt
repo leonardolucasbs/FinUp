@@ -7,5 +7,11 @@ data class UpdateCourseRequestDto(
     val title: String,
 
     @field:NotBlank(message = "Description is required")
-    val description: String
+    val description: String,
+
+    @field:NotBlank(message = "Teacher is required")
+    val teacher: String,
+
+    val imageUrl: String,
+
 )

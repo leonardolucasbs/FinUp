@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/data/models/app_user.dart';
 import 'package:frontend/presentation/content/view/content_page.dart';
+import 'package:frontend/presentation/course/view/course_page.dart';
 import 'package:frontend/presentation/widgets/nav_footer.dart';
 import 'package:frontend/presentation/profile/view/profile_page.dart';
 import 'package:frontend/presentation/dashboard/view/dashboard_list_page.dart';
@@ -81,12 +82,7 @@ class EmptyFeaturePage extends StatelessWidget {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (_) => EmptyFeaturePage(
-                title: _titleFor(tab),
-                icon: _iconFor(tab),
-                activeTab: tab,
-                user: user,
-              ),
+              builder: (_) => CoursesPage(user: user),
             ),
           );
           break;

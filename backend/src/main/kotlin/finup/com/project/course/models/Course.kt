@@ -15,6 +15,8 @@ data class Course(
     val id: Long? = null,
     var title: String,
     var description: String,
+    var teacher: String,
+    val imageUrl: String? = null,
     val createdAt: LocalDateTime = LocalDateTime.now(),
     var updatedAt: LocalDateTime = LocalDateTime.now()
 )

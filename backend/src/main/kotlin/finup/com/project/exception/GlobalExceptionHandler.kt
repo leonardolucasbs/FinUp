@@ -24,19 +24,13 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleApiException(exception: MethodArgumentNotValidException): ResponseEntity<Any> {
-        val errors: MutableMap<String?, String?> = HashMap()
-
-        exception.bindingResult.allErrors.forEach { error ->
-            val fieldName = (error as FieldError).field
-            val errorMessage = error.defaultMessage
-            errors[fieldName] = errorMessage
+        val errors = exception.bindingResult.fieldErrors.associate { error ->
+            error.field to error.defaultMessage
         }
 
         return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST.value())
-            .body(
-                mapOf("message" to errors)
-            )
-
+            .status(HttpStatus.BAD_REQUEST)
+            .body(mapOf("message" to errors))
     }
+
 }

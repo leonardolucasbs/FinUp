@@ -3,7 +3,9 @@ import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/data/models/app_user.dart';
 import 'package:frontend/data/models/content_model.dart';
 import 'package:frontend/data/services/content_service.dart';
-import 'package:frontend/presentation/common/view/empty_feature_page.dart';
+import 'package:frontend/presentation/profile/controller/profile_controller.dart';
+import 'package:frontend/presentation/widgets/shared_ui.dart';
+import 'package:frontend/presentation/course/view/course_page.dart';
 import 'package:frontend/presentation/widgets/nav_footer.dart';
 import 'package:frontend/presentation/login/view/login_page.dart';
 import 'package:frontend/presentation/profile/view/edit_profile_page.dart';
@@ -20,30 +22,39 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final _contentService = ContentService();
+  late final ProfileController _controller;
   late AppUser _user;
-  List<ContentModel> _posts = const [];
-  String? _postsError;
-  bool _isLoadingPosts = true;
 
   @override
   void initState() {
     super.initState();
     _user = widget.user;
-    _loadPosts();
+    _controller = ProfileController(
+      user: _user,
+      contentService: ContentService(),
+    )..loadPosts();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final initial = _initialFor(_user.fullName);
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        final initial = _initialFor(_user.fullName);
 
-    return Scaffold(
+        return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: RefreshIndicator(
           color: AppColors.primaryOrange,
           backgroundColor: AppColors.cardGrey,
-          onRefresh: _loadPosts,
+          onRefresh: _controller.loadPosts,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(22, 18, 22, 26),
@@ -52,17 +63,6 @@ class _ProfilePageState extends State<ProfilePage> {
               children: [
                 Row(
                   children: [
-                    IconButton(
-                      tooltip: 'Voltar',
-                      onPressed: () => Navigator.maybePop(context),
-                      icon: const Icon(Icons.arrow_back_rounded),
-                      color: Colors.white,
-                      style: IconButton.styleFrom(
-                        backgroundColor: AppColors.cardGrey,
-                        side: const BorderSide(color: AppColors.border),
-                        fixedSize: const Size(44, 44),
-                      ),
-                    ),
                     const SizedBox(width: 12),
                     const Text(
                       'Perfil',
@@ -172,7 +172,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     _ProfileActionRow(
                       icon: Icons.account_balance_wallet_rounded,
                       label: 'Controle de gastos',
-                      onTap: () => Navigator.maybePop(context),
+                      onTap: () => _openFeature(DashboardTab.home),
                     ),
                     _ProfileActionRow(
                       icon: Icons.edit_rounded,
@@ -225,28 +225,27 @@ class _ProfilePageState extends State<ProfilePage> {
         onTabSelected: _openTab,
       ),
     );
+      },
+    );
   }
 
   Widget _buildPostsContent() {
-    if (_isLoadingPosts) {
-      return const Padding(
+    if (_controller.isLoadingPosts) {
+      return const AppLoadingState(
         padding: EdgeInsets.symmetric(vertical: 18),
-        child: Center(
-          child: CircularProgressIndicator(color: AppColors.primaryOrange),
-        ),
       );
     }
 
-    if (_postsError != null) {
+    if (_controller.postsError != null) {
       return _PostsMessage(
         icon: Icons.error_outline_rounded,
-        title: _postsError!,
+        title: _controller.postsError!,
         actionLabel: 'Tentar novamente',
-        onAction: _loadPosts,
+        onAction: _controller.loadPosts,
       );
     }
 
-    if (_posts.isEmpty) {
+    if (_controller.posts.isEmpty) {
       return const _PostsMessage(
         icon: Icons.article_outlined,
         title: 'Voce ainda nao tem postagens.',
@@ -254,37 +253,19 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     return Column(
-      children: _posts
+      children: _controller.posts
           .map(
             (post) => Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: _PostCard(post: post),
+              child: _PostCard(
+                post: post,
+                isDeleting: _controller.isDeletingPost(post.id),
+                onDelete: () => _confirmDeletePost(post),
+              ),
             ),
           )
           .toList(growable: false),
     );
-  }
-
-  Future<void> _loadPosts() async {
-    setState(() {
-      _isLoadingPosts = true;
-      _postsError = null;
-    });
-
-    try {
-      final posts = await _contentService.findContentsByUser(_user.id);
-      if (!mounted) return;
-      setState(() {
-        _posts = posts;
-        _isLoadingPosts = false;
-      });
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _postsError = error.toString().replaceFirst('Exception: ', '');
-        _isLoadingPosts = false;
-      });
-    }
   }
 
   Future<void> _openEditProfile() async {
@@ -296,6 +277,8 @@ class _ProfilePageState extends State<ProfilePage> {
     if (updatedUser == null || !mounted) return;
 
     setState(() => _user = updatedUser);
+    _controller.updateUser(updatedUser);
+    await _controller.loadPosts();
   }
 
   String _initialFor(String name) {
@@ -310,7 +293,7 @@ class _ProfilePageState extends State<ProfilePage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => ContentPage(user: widget.user),
+            builder: (_) => ContentPage(user: _user),
           ),
         );
         break;
@@ -319,12 +302,7 @@ class _ProfilePageState extends State<ProfilePage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => EmptyFeaturePage(
-            title: _titleFor(tab),
-            icon: _iconFor(tab),
-            activeTab: tab,
-            user: widget.user,
-            ),
+            builder: (_) => CoursesPage(user: _user),
           ),
         );
         return;
@@ -333,7 +311,7 @@ class _ProfilePageState extends State<ProfilePage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => DashboardListPage(user: widget.user),
+            builder: (_) => DashboardListPage(user: _user),
           ),
         );
         return;
@@ -344,20 +322,75 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _openFeature(DashboardTab tab) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => EmptyFeaturePage(
-          title: _titleFor(tab),
-          icon: _iconFor(tab),
-          activeTab: tab,
-          user: _user,
-        ),
-      ),
-    );
+    switch (tab) {
+      case DashboardTab.saved:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ContentPage(user: widget.user),
+          ),
+        );
+        break;
+
+      case DashboardTab.courses:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CoursesPage(
+              user: _user,
+              initialShowOnlyMyCourses: true,
+            ),
+          ),
+        );
+        break;
+
+      case DashboardTab.home:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => DashboardListPage(user: widget.user),
+          ),
+        );
+        break;
+
+      case DashboardTab.profile:
+        return;
+      }
+
   }
 
-  String _titleFor(DashboardTab tab) {
+  Future<void> _confirmDeletePost(ContentModel post) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => const ConfirmDeleteDialog(
+        title: 'Excluir postagem',
+        message: 'Tem certeza que deseja excluir esta postagem?',
+      ),
+    );
+
+    if (!mounted || confirmed != true) return;
+
+    final deleted = await _controller.deletePost(post);
+    if (!mounted) return;
+
+    if (deleted) {
+      _showMessage('Postagem excluida com sucesso.');
+      return;
+    }
+
+    final errorMessage = _controller.submissionErrorMessage;
+    if (errorMessage != null) {
+      _showMessage(errorMessage);
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  String titleFor(DashboardTab tab) {
     return switch (tab) {
       DashboardTab.saved => 'Salvos',
       DashboardTab.courses => 'Cursos',
@@ -366,7 +399,7 @@ class _ProfilePageState extends State<ProfilePage> {
     };
   }
 
-  IconData _iconFor(DashboardTab tab) {
+  IconData iconFor(DashboardTab tab) {
     return switch (tab) {
       DashboardTab.saved => Icons.bookmark_rounded,
       DashboardTab.courses => Icons.school_rounded,
@@ -518,9 +551,15 @@ class _ProfileActionRow extends StatelessWidget {
 }
 
 class _PostCard extends StatelessWidget {
-  const _PostCard({required this.post});
+  const _PostCard({
+    required this.post,
+    required this.isDeleting,
+    required this.onDelete,
+  });
 
   final ContentModel post;
+  final bool isDeleting;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -556,12 +595,13 @@ class _PostCard extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              const Icon(
-                Icons.favorite_rounded,
-                color: AppColors.primaryRed,
-                size: 16,
+              AppActionButton(
+                onPressed: isDeleting ? null : onDelete,
+                icon: Icons.delete_outline_rounded,
+                label: 'Excluir',
+                foregroundColor: AppColors.primaryRed,
+                isLoading: isDeleting,
               ),
-              const SizedBox(width: 4),
             ],
           ),
           const SizedBox(height: 12),
