@@ -25,6 +25,13 @@ class SavedContentService(
         val content = contentRepository.findById(dto.contentId)
             .orElseThrow { ContentNotFoundException("Content with id ${dto.contentId} not found") }
 
+        if (content.user.id == user.id) {
+            throw ApiException(ApiException.Error.CANNOT_SAVE_OWN_CONTENT)
+        }
+        if (savedContentRepository.findIfUserSavedContent(user.id!!, content.id!!)) {
+            throw ApiException(ApiException.Error.CONTENT_ALREADY_SAVED)
+        }
+
         val savedContent = savedContentMapper.toEntity(dto, user, content)
         val saved = savedContentRepository.save(savedContent)
         return savedContentMapper.toDTO(saved)
@@ -45,5 +52,13 @@ class SavedContentService(
             throw SavedContentNotFoundException("Saved content with id $id not found")
         }
         savedContentRepository.deleteById(id)
+    }
+
+    fun numberOfSavedContentByContentId(contentId: Long): Int {
+        return savedContentRepository.numberOfSaved(contentId);
+    }
+
+    fun findIfUserSavedContent(userId: Int, contentId: Long): Boolean {
+        return savedContentRepository.findIfUserSavedContent(userId, contentId)
     }
 }

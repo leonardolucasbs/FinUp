@@ -21,7 +21,6 @@ data class Content(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
     var title: String,
-    var likes: Int = 0,
     @Enumerated(EnumType.STRING)  
     var type: ContentType = ContentType.OTHERS,
     var description: String,

@@ -10,10 +10,14 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
 import java.time.LocalDateTime
 
 @Entity
-@Table(name = "saved_content")
+@Table(
+    name = "saved_content",
+    uniqueConstraints = [UniqueConstraint(columnNames = ["user_id", "content_id"])]
+)
 data class SavedContent(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

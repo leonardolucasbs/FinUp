@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/data/models/app_user.dart';
-import 'package:frontend/presentation/dashboard/widgets/dashboard_bottom_nav.dart';
+import 'package:frontend/presentation/content/view/content_page.dart';
+import 'package:frontend/presentation/widgets/nav_footer.dart';
 import 'package:frontend/presentation/profile/view/profile_page.dart';
+import 'package:frontend/presentation/dashboard/view/dashboard_list_page.dart';
 
 class EmptyFeaturePage extends StatelessWidget {
   const EmptyFeaturePage({
@@ -58,36 +60,55 @@ class EmptyFeaturePage extends StatelessWidget {
       ),
       bottomNavigationBar: DashboardBottomNav(
         activeTab: activeTab,
-        onTabSelected: (tab) => _navigate(context, tab),
+        onTabSelected: (tab) => _openTab(tab, context),
       ),
     );
   }
 
-  void _navigate(BuildContext context, DashboardTab tab) {
-    if (tab == activeTab) return;
-    if (tab == DashboardTab.home) {
-      Navigator.pop(context);
-      return;
-    }
-    if (tab == DashboardTab.profile) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => ProfilePage(user: user)),
-      );
-      return;
-    }
+    void _openTab(DashboardTab tab, BuildContext context) {
+      switch (tab) {
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => EmptyFeaturePage(
-          title: _titleFor(tab),
-          icon: _iconFor(tab),
-          activeTab: tab,
-          user: user,
-        ),
-      ),
-    );
+        case DashboardTab.saved:
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ContentPage(user: user),
+            ),
+          );
+          break;
+
+        case DashboardTab.courses:
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => EmptyFeaturePage(
+                title: _titleFor(tab),
+                icon: _iconFor(tab),
+                activeTab: tab,
+                user: user,
+              ),
+            ),
+          );
+          break;
+
+        case DashboardTab.home:
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => DashboardListPage(user: user),
+            ),
+          );
+          break;
+
+        case DashboardTab.profile:
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ProfilePage(user: user),
+            ),
+          );
+          break;
+      }
   }
 
   String _titleFor(DashboardTab tab) {

@@ -4,9 +4,11 @@ import 'package:frontend/data/models/app_user.dart';
 import 'package:frontend/data/models/content_model.dart';
 import 'package:frontend/data/services/content_service.dart';
 import 'package:frontend/presentation/common/view/empty_feature_page.dart';
-import 'package:frontend/presentation/dashboard/widgets/dashboard_bottom_nav.dart';
+import 'package:frontend/presentation/widgets/nav_footer.dart';
 import 'package:frontend/presentation/login/view/login_page.dart';
 import 'package:frontend/presentation/profile/view/edit_profile_page.dart';
+import '../../dashboard/view/dashboard_list_page.dart';
+import 'package:frontend/presentation/content/view/content_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key, required this.user});
@@ -220,7 +222,7 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       bottomNavigationBar: DashboardBottomNav(
         activeTab: DashboardTab.profile,
-        onTabSelected: _navigate,
+        onTabSelected: _openTab,
       ),
     );
   }
@@ -301,14 +303,44 @@ class _ProfilePageState extends State<ProfilePage> {
     return trimmed.isNotEmpty ? trimmed[0].toUpperCase() : 'U';
   }
 
-  void _navigate(DashboardTab tab) {
-    if (tab == DashboardTab.profile) return;
-    if (tab == DashboardTab.home) {
-      Navigator.pop(context);
-      return;
-    }
+  void _openTab(DashboardTab tab) {
+    switch (tab) {
 
-    _openFeature(tab);
+      case DashboardTab.saved:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ContentPage(user: widget.user),
+          ),
+        );
+        break;
+
+      case DashboardTab.courses:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => EmptyFeaturePage(
+            title: _titleFor(tab),
+            icon: _iconFor(tab),
+            activeTab: tab,
+            user: widget.user,
+            ),
+          ),
+        );
+        return;
+
+      case DashboardTab.home:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => DashboardListPage(user: widget.user),
+          ),
+        );
+        return;
+
+      case DashboardTab.profile:
+        return;
+    }
   }
 
   void _openFeature(DashboardTab tab) {
@@ -530,13 +562,6 @@ class _PostCard extends StatelessWidget {
                 size: 16,
               ),
               const SizedBox(width: 4),
-              Text(
-                '${post.likes}',
-                style: const TextStyle(
-                  color: AppColors.textGrey,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
             ],
           ),
           const SizedBox(height: 12),

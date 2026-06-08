@@ -46,6 +46,17 @@ class UserService {
     }
   }
 
+  Future<AppUser> getUserById({ required int userId }) async { 
+    try {
+      final response = await _dio.get("/users/$userId");
+      return AppUser.fromJson(response.data['data'] as Map<String, dynamic>);
+
+    } on DioException catch (error) {
+      throw Exception(_messageFromDio(error));
+    
+    }
+  }
+  
   Future<AppUser> updateUser({
     required AppUser user,
     required String fullName,
