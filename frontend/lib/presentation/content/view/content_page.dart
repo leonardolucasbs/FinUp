@@ -16,7 +16,6 @@ import 'package:frontend/presentation/widgets/shared_ui.dart';
 
 import 'package:intl/intl.dart';
 
-
 class ContentPage extends StatefulWidget {
   const ContentPage({super.key, required this.user});
 
@@ -38,7 +37,6 @@ class _ContentPageState extends State<ContentPage> {
       contentService: ContentService(),
       savedContentService: SavedContentService(),
     )..load();
-    
   }
 
   @override
@@ -106,7 +104,7 @@ class _ContentPageState extends State<ContentPage> {
         children: [
           const Center(
             child: Text(
-              'Conteudo',
+              'Feed',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 22,
@@ -121,12 +119,15 @@ class _ContentPageState extends State<ContentPage> {
             onChanged: _controller.setSearchTerm,
           ),
           const SizedBox(height: 12),
-          AppFilterTabs(
-            firstLabel: 'Todas as postagens',
-            secondLabel: 'Minhas postagens',
-            isSecondActive: _controller.showOnlyMyPosts,
-            onFirstPressed: () => _controller.setShowOnlyMyPosts(false),
-            onSecondPressed: () => _controller.setShowOnlyMyPosts(true),
+          _ContentFilterTabs(
+            showOnlyMyPosts: _controller.showOnlyMyPosts,
+            showOnlySavedPosts: _controller.showOnlySavedPosts,
+            onAllPressed: () {
+              _controller.setShowOnlyMyPosts(false);
+              _controller.setShowOnlySavedPosts(false);
+            },
+            onMinePressed: () => _controller.setShowOnlyMyPosts(true),
+            onSavedPressed: () => _controller.setShowOnlySavedPosts(true),
           ),
           const SizedBox(height: 16),
           if (contents.isEmpty)
@@ -136,26 +137,24 @@ class _ContentPageState extends State<ContentPage> {
               compact: true,
             )
           else
-            ...contents.map(
-              (content) {
-                final isOwner = _controller.isOwner(content);
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 14),
-                  child: ContentCard(
-                    content: content,
-                    saveCount: _controller.saveCountFor(content.id),
-                    isSaved: _controller.hasUserSaved(content.id),
-                    isSaving: _controller.isSavingContent(content.id),
-                    isActionDisabled: _controller.isSubmitting,
-                    onEdit: isOwner ? () => _showEditSheet(content) : null,
-                    onDelete: isOwner
-                        ? () => _confirmDeleteContent(content)
-                        : null,
-                    onToggleSaved: isOwner ? null : () => _toggleSaved(content),
-                  ),
-                );
-              },
-            ),
+            ...contents.map((content) {
+              final isOwner = _controller.isOwner(content);
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: ContentCard(
+                  content: content,
+                  saveCount: _controller.saveCountFor(content.id),
+                  isSaved: _controller.hasUserSaved(content.id),
+                  isSaving: _controller.isSavingContent(content.id),
+                  isActionDisabled: _controller.isSubmitting,
+                  onEdit: isOwner ? () => _showEditSheet(content) : null,
+                  onDelete: isOwner
+                      ? () => _confirmDeleteContent(content)
+                      : null,
+                  onToggleSaved: isOwner ? null : () => _toggleSaved(content),
+                ),
+              );
+            }),
         ],
       ),
     );
@@ -168,27 +167,25 @@ class _ContentPageState extends State<ContentPage> {
     if (_controller.showOnlyMyPosts) {
       return 'Voce ainda nao publicou postagens.';
     }
-    return 'Nenhum conteudo publicado ainda.';
+    if (_controller.showOnlySavedPosts) {
+      return 'Voce ainda nao salvou posts.';
+    }
+    return 'Nenhum post publicado ainda.';
   }
 
   void _openTab(DashboardTab tab) {
     switch (tab) {
-
       case DashboardTab.saved:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (_) => ContentPage(user: widget.user),
-          ),
+          MaterialPageRoute(builder: (_) => ContentPage(user: widget.user)),
         );
         break;
 
       case DashboardTab.courses:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (_) => CoursesPage(user: widget.user),
-          ),
+          MaterialPageRoute(builder: (_) => CoursesPage(user: widget.user)),
         );
         break;
 
@@ -204,9 +201,7 @@ class _ContentPageState extends State<ContentPage> {
       case DashboardTab.profile:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (_) => ProfilePage(user: widget.user),
-          ),
+          MaterialPageRoute(builder: (_) => ProfilePage(user: widget.user)),
         );
         break;
     }
@@ -214,8 +209,8 @@ class _ContentPageState extends State<ContentPage> {
 
   String _titleFor(DashboardTab tab) {
     return switch (tab) {
-      DashboardTab.home    => 'Home',
-      DashboardTab.saved   => 'Conteúdo',
+      DashboardTab.home => 'Home',
+      DashboardTab.saved => 'Conteúdo',
       DashboardTab.courses => 'Cursos',
       DashboardTab.profile => 'Meu Perfil',
     };
@@ -251,7 +246,7 @@ class _ContentPageState extends State<ContentPage> {
     if (!mounted) return;
 
     if (created == true) {
-      _showMessage('Conteudo criado com sucesso.');
+      _showMessage('Post criado com sucesso.');
       return;
     }
 
@@ -270,18 +265,20 @@ class _ContentPageState extends State<ContentPage> {
       builder: (_) => CreateContentSheet(
         isSubmitting: _controller.isSubmitting,
         initialContent: content,
-        onSubmit: ({
-          required title,
-          required description,
-          required type,
-          imageUrl,
-        }) =>
-            _controller.updateContent(
+        onSubmit:
+            ({
+              required title,
+              required description,
+              required type,
+              imageBytes,
+              imageFileName,
+            }) => _controller.updateContent(
               content: content,
               title: title,
               description: description,
               type: type,
-              imageUrl: imageUrl,
+              imageBytes: imageBytes,
+              imageFileName: imageFileName,
             ),
       ),
     );
@@ -289,7 +286,7 @@ class _ContentPageState extends State<ContentPage> {
     if (!mounted) return;
 
     if (updated == true) {
-      _showMessage('Conteudo atualizado com sucesso.');
+      _showMessage('Post atualizado com sucesso.');
       return;
     }
 
@@ -314,7 +311,7 @@ class _ContentPageState extends State<ContentPage> {
     if (!mounted) return;
 
     if (deleted) {
-      _showMessage('Conteudo excluido com sucesso.');
+      _showMessage('Post excluido com sucesso.');
       return;
     }
 
@@ -331,9 +328,7 @@ class _ContentPageState extends State<ContentPage> {
 
     if (changed) {
       _showMessage(
-        wasSaved
-            ? 'Conteudo removido dos salvos.'
-            : 'Conteudo salvo com sucesso.',
+        wasSaved ? 'Post removido dos salvos.' : 'Post salvo com sucesso.',
       );
       return;
     }
@@ -345,9 +340,64 @@ class _ContentPageState extends State<ContentPage> {
   }
 }
 
+class _ContentFilterTabs extends StatelessWidget {
+  const _ContentFilterTabs({
+    required this.showOnlyMyPosts,
+    required this.showOnlySavedPosts,
+    required this.onAllPressed,
+    required this.onMinePressed,
+    required this.onSavedPressed,
+  });
+
+  final bool showOnlyMyPosts;
+  final bool showOnlySavedPosts;
+  final VoidCallback onAllPressed;
+  final VoidCallback onMinePressed;
+  final VoidCallback onSavedPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppColors.inputField,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: AppFilterButton(
+              label: 'Todas',
+              active: !showOnlyMyPosts && !showOnlySavedPosts,
+              onPressed: onAllPressed,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: AppFilterButton(
+              label: 'Meus Posts',
+              active: showOnlyMyPosts,
+              onPressed: onMinePressed,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: AppFilterButton(
+              label: 'Meus salvos',
+              active: showOnlySavedPosts,
+              onPressed: onSavedPressed,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class ContentCard extends StatelessWidget {
-  final UserService _userService = UserService(); 
-  
+  final UserService _userService = UserService();
+
   ContentCard({
     super.key,
     required this.content,
@@ -376,41 +426,38 @@ class ContentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final contentImageUrl = content.imageUrl.trim();
+    final contentImageBytes = content.imageBytes;
     final canManageContent = onEdit != null || onDelete != null;
     final canSaveContent = !canManageContent && onToggleSaved != null;
 
     return FutureBuilder<AppUser>(
-        future: _userService.getUserById(userId: content.userId),
-        builder: (context, snapshot) {
-      
-          String fullName = "Carregando...";
-          String avatarUrl = '';
-          
-          if (snapshot.hasData) {
-            fullName = snapshot.data!.fullName;
-            avatarUrl = snapshot.data!.avatarUrl ?? '';
+      future: _userService.getUserById(userId: content.userId),
+      builder: (context, snapshot) {
+        String fullName = "Carregando...";
+        String avatarUrl = '';
 
-          } else if (snapshot.hasError) {
-            fullName = "Usuário desconhecido";
+        if (snapshot.hasData) {
+          fullName = snapshot.data!.fullName;
+          avatarUrl = snapshot.data!.avatarUrl ?? '';
+        } else if (snapshot.hasError) {
+          fullName = "Usuário desconhecido";
+        }
 
-          }
-          
-          return Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: AppColors.cardGrey,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: AppColors.border),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.background.withValues(alpha: 0.45),
-                  blurRadius: 16,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Column(
+        return Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: AppColors.cardGrey,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: AppColors.border),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.background.withValues(alpha: 0.45),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
@@ -418,10 +465,7 @@ class ContentCard extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    _ContentAvatar(
-                      imageUrl: avatarUrl,
-                      fallbackText: fullName,
-                    ),
+                    _ContentAvatar(imageUrl: avatarUrl, fallbackText: fullName),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -460,15 +504,14 @@ class ContentCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (contentImageUrl.isNotEmpty) ...[
+                    if (contentImageBytes != null) ...[
                       ClipRRect(
                         borderRadius: BorderRadius.circular(14),
-                        child: Image.network(
-                          contentImageUrl,
+                        child: Image.memory(
+                          contentImageBytes,
                           width: double.infinity,
                           height: 170,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => const SizedBox.shrink(),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -483,7 +526,11 @@ class ContentCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 14),
-                    const Divider(height: 1, thickness: 1, color: AppColors.border),
+                    const Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: AppColors.border,
+                    ),
                     const SizedBox(height: 12),
                     Text(
                       'Salvos: $saveCount',
@@ -539,11 +586,11 @@ class ContentCard extends StatelessWidget {
               ),
             ],
           ),
-          );
-        }
-      );
-    }
+        );
+      },
+    );
   }
+}
 
 class _ContentActionButton extends StatelessWidget {
   const _ContentActionButton({
@@ -569,13 +616,8 @@ class _ContentActionButton extends StatelessWidget {
         disabledForegroundColor: AppColors.muted.withValues(alpha: 0.45),
         side: const BorderSide(color: AppColors.border),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        textStyle: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w800,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

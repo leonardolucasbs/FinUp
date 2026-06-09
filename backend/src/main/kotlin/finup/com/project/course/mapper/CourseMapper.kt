@@ -13,6 +13,11 @@ class CourseMapper {
             title = dto.title,
             description = dto.description,
             teacher = dto.teacher,
+            courseType = dto.courseType,
+            location = dto.location,
+            courseHours = dto.courseHours,
+            startDate = dto.startDate,
+            level = dto.level,
             imageUrl = dto.imageUrl,
         )
     }
@@ -24,6 +29,11 @@ class CourseMapper {
             description = entity.description,
             imageUrl = entity.imageUrl,
             teacher = entity.teacher,
+            courseType = entity.courseType,
+            location = entity.location,
+            courseHours = entity.courseHours,
+            startDate = entity.startDate,
+            level = entity.level,
             createdAt = entity.createdAt,
             updatedAt = entity.updatedAt
         )

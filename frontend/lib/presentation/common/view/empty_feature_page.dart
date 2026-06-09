@@ -107,21 +107,4 @@ class EmptyFeaturePage extends StatelessWidget {
       }
   }
 
-  String _titleFor(DashboardTab tab) {
-    return switch (tab) {
-      DashboardTab.saved => 'Salvos',
-      DashboardTab.courses => 'Cursos',
-      DashboardTab.profile => user.fullName,
-      DashboardTab.home => 'Home',
-    };
-  }
-
-  IconData _iconFor(DashboardTab tab) {
-    return switch (tab) {
-      DashboardTab.saved => Icons.bookmark_rounded,
-      DashboardTab.courses => Icons.school_rounded,
-      DashboardTab.profile => Icons.person_rounded,
-      DashboardTab.home => Icons.home_rounded,
-    };
-  }
 }

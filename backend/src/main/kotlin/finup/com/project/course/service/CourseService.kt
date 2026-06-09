@@ -37,6 +37,13 @@ class CourseService(
 
         course.title = dto.title
         course.description = dto.description
+        course.teacher = dto.teacher
+        course.courseType = dto.courseType
+        course.location = dto.location
+        course.courseHours = dto.courseHours
+        course.startDate = dto.startDate
+        course.level = dto.level
+        course.imageUrl = dto.imageUrl ?: course.imageUrl
         course.updatedAt = LocalDateTime.now()
 
         val updatedCourse = courseRepository.save(course)

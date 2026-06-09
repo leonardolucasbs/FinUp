@@ -23,7 +23,6 @@ class ContentService {
     }
   }
 
-
   Future<List<ContentModel>> findAllContents() async {
     try {
       final response = await _dio.get('/contents');
@@ -47,7 +46,11 @@ class ContentService {
 
   Future<ContentModel> createContent(CreateContentRequest request) async {
     try {
-      final response = await _dio.post('/contents', data: request.toJson());
+      final response = await _dio.post(
+        '/contents',
+        data: _formDataFromCreateRequest(request),
+        options: Options(contentType: Headers.multipartFormDataContentType),
+      );
       return ContentModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (error) {
       throw Exception(_messageFromDio(error));
@@ -61,12 +64,37 @@ class ContentService {
     try {
       final response = await _dio.put(
         '/contents/$contentId',
-        data: request.toJson(),
+        data: _formDataFromUpdateRequest(request),
+        options: Options(contentType: Headers.multipartFormDataContentType),
       );
       return ContentModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (error) {
       throw Exception(_messageFromDio(error));
     }
+  }
+
+  FormData _formDataFromCreateRequest(CreateContentRequest request) {
+    final data = Map<String, dynamic>.from(request.toJson());
+    final imageBytes = request.imageBytes;
+    if (imageBytes != null && imageBytes.isNotEmpty) {
+      data['image'] = MultipartFile.fromBytes(
+        imageBytes,
+        filename: request.imageFileName ?? 'content-image',
+      );
+    }
+    return FormData.fromMap(data);
+  }
+
+  FormData _formDataFromUpdateRequest(UpdateContentRequest request) {
+    final data = Map<String, dynamic>.from(request.toJson());
+    final imageBytes = request.imageBytes;
+    if (imageBytes != null && imageBytes.isNotEmpty) {
+      data['image'] = MultipartFile.fromBytes(
+        imageBytes,
+        filename: request.imageFileName ?? 'content-image',
+      );
+    }
+    return FormData.fromMap(data);
   }
 
   Future<void> deleteContent(int contentId) async {

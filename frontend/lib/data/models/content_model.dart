@@ -1,10 +1,14 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 class ContentModel {
   const ContentModel({
     required this.id,
     required this.title,
     required this.type,
     required this.description,
-    required this.imageUrl,
+    required this.imageData,
+    required this.imageContentType,
     required this.userId,
     required this.createdAt,
     required this.updatedAt,
@@ -14,10 +18,22 @@ class ContentModel {
   final String title;
   final String type;
   final String description;
-  final String imageUrl;
+  final String imageData;
+  final String imageContentType;
   final int userId;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  bool get hasImage => imageData.trim().isNotEmpty;
+
+  Uint8List? get imageBytes {
+    if (!hasImage) return null;
+    try {
+      return base64Decode(imageData);
+    } on FormatException {
+      return null;
+    }
+  }
 
   String get typeLabel {
     return switch (type) {
@@ -34,7 +50,8 @@ class ContentModel {
       title: json['title'] as String? ?? '',
       type: json['type'] as String? ?? '',
       description: json['description'] as String? ?? '',
-      imageUrl: json['imageUrl'] as String? ?? '',
+      imageData: json['imageData'] as String? ?? '',
+      imageContentType: json['imageContentType'] as String? ?? '',
       userId: (json['userId'] as num).toInt(),
       createdAt:
           DateTime.tryParse(json['createdAt'] as String? ?? '') ??
@@ -52,14 +69,16 @@ class CreateContentRequest {
     required this.description,
     required this.type,
     required this.userId,
-    this.imageUrl,
+    this.imageBytes,
+    this.imageFileName,
   });
 
   final String title;
   final String description;
   final String type;
   final int userId;
-  final String? imageUrl;
+  final Uint8List? imageBytes;
+  final String? imageFileName;
 
   Map<String, dynamic> toJson() {
     return {
@@ -67,7 +86,6 @@ class CreateContentRequest {
       'description': description,
       'type': type,
       'userId': userId,
-      'imageUrl': imageUrl,
     };
   }
 }
@@ -77,21 +95,18 @@ class UpdateContentRequest {
     required this.title,
     required this.description,
     required this.type,
-    this.imageUrl,
+    this.imageBytes,
+    this.imageFileName,
   });
 
   final String title;
   final String description;
   final String type;
-  final String? imageUrl;
+  final Uint8List? imageBytes;
+  final String? imageFileName;
 
   Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'description': description,
-      'type': type,
-      'imageUrl': imageUrl,
-    };
+    return {'title': title, 'description': description, 'type': type};
   }
 }
 
@@ -105,10 +120,7 @@ class CreateSavedContentRequest {
   final int contentId;
 
   Map<String, dynamic> toJson() {
-    return {
-      'userId': userId,
-      'contentId': contentId,
-    };
+    return {'userId': userId, 'contentId': contentId};
   }
 }
 

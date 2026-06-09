@@ -1,5 +1,7 @@
+import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/data/models/content_model.dart';
@@ -18,7 +20,8 @@ class CreateContentSheet extends StatefulWidget {
     required String title,
     required String description,
     required String type,
-    String? imageUrl,
+    Uint8List? imageBytes,
+    String? imageFileName,
   })
   onSubmit;
 
@@ -28,12 +31,19 @@ class CreateContentSheet extends StatefulWidget {
 
 class _CreateContentSheetState extends State<CreateContentSheet> {
   static const _types = ['NOTES', 'NEWS', 'ARTICLES', 'OTHERS'];
+  static const _typeLabels = {
+    'NOTES': 'Notas',
+    'NEWS': 'Noticias',
+    'ARTICLES': 'Artigos',
+    'OTHERS': 'Outros',
+  };
 
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _imageUrlController = TextEditingController();
   String? _selectedType = _types.first;
+  Uint8List? _selectedImageBytes;
+  String? _selectedImageFileName;
   bool _isSubmitting = false;
 
   bool get _isEditing => widget.initialContent != null;
@@ -46,7 +56,6 @@ class _CreateContentSheetState extends State<CreateContentSheet> {
 
     _titleController.text = content.title;
     _descriptionController.text = content.description;
-    _imageUrlController.text = content.imageUrl;
     _selectedType = _types.contains(content.type) ? content.type : _types.first;
   }
 
@@ -54,7 +63,6 @@ class _CreateContentSheetState extends State<CreateContentSheet> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
-    _imageUrlController.dispose();
     super.dispose();
   }
 
@@ -156,14 +164,14 @@ class _CreateContentSheetState extends State<CreateContentSheet> {
                     iconEnabledColor: AppColors.textGrey,
                     style: const TextStyle(color: Colors.white),
                     decoration: _inputDecoration(
-                      label: 'type',
+                      label: 'tipo',
                       icon: Icons.category_outlined,
                     ),
                     items: _types
                         .map(
                           (type) => DropdownMenuItem(
                             value: type,
-                            child: Text(type),
+                            child: Text(_typeLabels[type] ?? type),
                           ),
                         )
                         .toList(),
@@ -174,13 +182,24 @@ class _CreateContentSheetState extends State<CreateContentSheet> {
                         value == null ? 'Selecione um tipo.' : null,
                   ),
                   const SizedBox(height: 14),
-                  TextFormField(
-                    controller: _imageUrlController,
-                    keyboardType: TextInputType.url,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: _inputDecoration(
-                      label: 'imageUrl',
-                      icon: Icons.image_outlined,
+                  OutlinedButton.icon(
+                    onPressed: isSubmitting ? null : _pickImage,
+                    icon: const Icon(Icons.image_outlined),
+                    label: Text(_imageButtonLabel),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      disabledForegroundColor: AppColors.muted.withValues(
+                        alpha: 0.45,
+                      ),
+                      side: const BorderSide(color: AppColors.border),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
+                      alignment: Alignment.centerLeft,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 22),
@@ -227,7 +246,8 @@ class _CreateContentSheetState extends State<CreateContentSheet> {
       title: _titleController.text.trim(),
       description: _descriptionController.text.trim(),
       type: _selectedType!,
-      imageUrl: _imageUrlController.text.trim(),
+      imageBytes: _selectedImageBytes,
+      imageFileName: _selectedImageFileName,
     );
     if (!mounted) return;
     setState(() => _isSubmitting = false);
@@ -235,6 +255,30 @@ class _CreateContentSheetState extends State<CreateContentSheet> {
     if (success) {
       Navigator.pop(context, true);
     }
+  }
+
+  String get _imageButtonLabel {
+    if (_selectedImageFileName != null) return _selectedImageFileName!;
+    if (_isEditing && widget.initialContent?.hasImage == true) {
+      return 'Imagem atual mantida';
+    }
+    return 'Selecionar imagem do dispositivo';
+  }
+
+  Future<void> _pickImage() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      allowMultiple: false,
+      withData: true,
+    );
+    final file = result?.files.single;
+    final bytes = file?.bytes;
+    if (file == null || bytes == null || bytes.isEmpty) return;
+
+    setState(() {
+      _selectedImageBytes = bytes;
+      _selectedImageFileName = file.name;
+    });
   }
 }
 

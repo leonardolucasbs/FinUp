@@ -19,7 +19,8 @@ class ContentService(
 ) {
 
     fun create(dto: CreateContentRequestDto): ContentDTO {
-        val user = userRepository.findUserById(dto.userId)
+        val userId = dto.userId ?: throw ApiException(ApiException.Error.USER_NOT_FOUND)
+        val user = userRepository.findUserById(userId)
             .orElseThrow { ApiException(ApiException.Error.USER_NOT_FOUND) }
         val content = contentMapper.toEntity(dto, user)
         val savedContent = contentRepository.save(content)
@@ -47,8 +48,10 @@ class ContentService(
         }
         content.updatedAt = LocalDateTime.now()
 
-        if (dto.imageUrl != null) {
-            content.imageUrl = dto.imageUrl
+        val image = dto.image?.takeIf { !it.isEmpty }
+        if (image != null) {
+            content.imageData = image.bytes
+            content.imageContentType = image.contentType
         }
 
         val updatedContent = contentRepository.save(content)

@@ -10,8 +10,8 @@ class ContentController extends ChangeNotifier {
     required this.user,
     required ContentService contentService,
     required SavedContentService savedContentService,
-  })  : _contentService = contentService,
-        _savedContentService = savedContentService;
+  }) : _contentService = contentService,
+       _savedContentService = savedContentService;
 
   final AppUser user;
   final ContentService _contentService;
@@ -25,6 +25,7 @@ class ContentController extends ChangeNotifier {
   bool isLoading = false;
   bool isSubmitting = false;
   bool showOnlyMyPosts = false;
+  bool showOnlySavedPosts = false;
   String searchTerm = '';
   String? errorMessage;
   String? submissionErrorMessage;
@@ -35,6 +36,12 @@ class ContentController extends ChangeNotifier {
 
     if (showOnlyMyPosts) {
       result = result.where((content) => content.userId == user.id);
+    }
+
+    if (showOnlySavedPosts) {
+      result = result.where(
+        (content) => savedByCurrentUser[content.id] == true,
+      );
     }
 
     if (term.isNotEmpty) {
@@ -111,6 +118,17 @@ class ContentController extends ChangeNotifier {
 
   void setShowOnlyMyPosts(bool value) {
     showOnlyMyPosts = value;
+    if (value) {
+      showOnlySavedPosts = false;
+    }
+    notifyListeners();
+  }
+
+  void setShowOnlySavedPosts(bool value) {
+    showOnlySavedPosts = value;
+    if (value) {
+      showOnlyMyPosts = false;
+    }
     notifyListeners();
   }
 
@@ -190,7 +208,8 @@ class ContentController extends ChangeNotifier {
     required String title,
     required String description,
     required String type,
-    String? imageUrl,
+    Uint8List? imageBytes,
+    String? imageFileName,
   }) async {
     isSubmitting = true;
     submissionErrorMessage = null;
@@ -203,9 +222,8 @@ class ContentController extends ChangeNotifier {
           description: description,
           type: type,
           userId: user.id,
-          imageUrl: imageUrl == null || imageUrl.trim().isEmpty
-              ? null
-              : imageUrl.trim(),
+          imageBytes: imageBytes,
+          imageFileName: imageFileName,
         ),
       );
       await load();
@@ -225,7 +243,8 @@ class ContentController extends ChangeNotifier {
     required String title,
     required String description,
     required String type,
-    String? imageUrl,
+    Uint8List? imageBytes,
+    String? imageFileName,
   }) async {
     if (!isOwner(content)) {
       submissionErrorMessage = 'Apenas o autor pode editar este conteudo.';
@@ -244,9 +263,8 @@ class ContentController extends ChangeNotifier {
           title: title,
           description: description,
           type: type,
-          imageUrl: imageUrl == null || imageUrl.trim().isEmpty
-              ? null
-              : imageUrl.trim(),
+          imageBytes: imageBytes,
+          imageFileName: imageFileName,
         ),
       );
       await load();
@@ -311,10 +329,7 @@ class ContentController extends ChangeNotifier {
 
     try {
       final savedContent = await _savedContentService.createSavedContent(
-        CreateSavedContentRequest(
-          userId: user.id,
-          contentId: content.id,
-        ),
+        CreateSavedContentRequest(userId: user.id, contentId: content.id),
       );
       savedByCurrentUser = Map<int, bool>.from(savedByCurrentUser)
         ..[content.id] = true;

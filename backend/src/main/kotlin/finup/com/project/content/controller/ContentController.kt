@@ -6,6 +6,7 @@ import finup.com.project.content.models.dto.UpdateContentRequestDTO
 import finup.com.project.content.service.ContentService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -13,8 +14,8 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/contents")
 class ContentController(private val contentService: ContentService) {
 
-    @PostMapping
-    fun create(@Valid @RequestBody dto: CreateContentRequestDto): ResponseEntity<ContentDTO> {
+    @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun create(@Valid @ModelAttribute dto: CreateContentRequestDto): ResponseEntity<ContentDTO> {
         val content = contentService.create(dto)
         return ResponseEntity.status(HttpStatus.CREATED).body(content)
     }
@@ -31,8 +32,8 @@ class ContentController(private val contentService: ContentService) {
         return ResponseEntity.ok(content)
     }
     
-    @PutMapping("/{id}")
-    fun update(@PathVariable id: Long, @Valid @RequestBody dto: UpdateContentRequestDTO): ResponseEntity<ContentDTO> {
+    @PutMapping("/{id}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun update(@PathVariable id: Long, @Valid @ModelAttribute dto: UpdateContentRequestDTO): ResponseEntity<ContentDTO> {
         val updatedContent = contentService.update(id, dto)
         return ResponseEntity.ok(updatedContent)
     }
